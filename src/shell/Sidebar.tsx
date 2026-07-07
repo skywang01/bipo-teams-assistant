@@ -25,7 +25,7 @@ export function Sidebar() {
       </div>
 
       <button className={`side-newchat ${activeView === "chat" ? "on" : ""}`} onClick={newChat} title={t("newChat")}>
-        <span className="ic">✎</span>{!collapsed && <span>{t("newChat")}</span>}
+        <span className="ic">🏠</span>{!collapsed && <span>{t("newChat")}</span>}
       </button>
 
       <div className="side-group">
