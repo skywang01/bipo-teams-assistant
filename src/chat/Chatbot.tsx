@@ -2,7 +2,7 @@
 // agent 调工具 → 成功文本回流）。角色不同 → 问候语/快捷入口不同；会话按角色隔离
 // （App 用 key=role 重挂载）。
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useStore } from "../state/store";
 import { ChatActionsContext } from "./chatContext";
 import { A2UIRenderer } from "../a2ui/components";
@@ -79,8 +79,27 @@ export function Chatbot() {
     setInput("");
   };
 
-  // 语音录入：识别文本实时填入输入框，用户复核后发送
-  const speech = useSpeech(lang, (text) => setInput(text));
+  // 语音录入（对齐小程序）：按住说话、上滑取消、松开自动发送
+  const speech = useSpeech(lang, (text) => void send(text));
+  const [cancelArmed, setCancelArmed] = useState(false);
+  const micStartY = useRef(0);
+  const micDown = (e: ReactPointerEvent) => {
+    e.preventDefault();
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    micStartY.current = e.clientY;
+    setCancelArmed(false);
+    speech.start();
+  };
+  const micMove = (e: ReactPointerEvent) => {
+    if (!speech.recording) return;
+    setCancelArmed(micStartY.current - e.clientY > 60); // 上滑超过 60px = 取消
+  };
+  const micUp = () => {
+    if (!speech.recording) return;
+    if (cancelArmed) speech.cancel();
+    else speech.finish();
+    setCancelArmed(false);
+  };
 
   const suggestions = SUGGEST[role][lang];
 
@@ -118,6 +137,17 @@ export function Chatbot() {
         </div>
 
         <div className="composer">
+          {speech.recording && (
+            <div className={`rec-overlay ${cancelArmed ? "cancel" : ""}`}>
+              <div className="rec-mic">🎙️</div>
+              <div className="rec-text">{speech.interim || (lang === "zh" ? "正在聆听…" : "Listening…")}</div>
+              <div className="rec-hint">
+                {cancelArmed
+                  ? lang === "zh" ? "松开手指 · 取消" : "Release to cancel"
+                  : lang === "zh" ? "松开发送 · 上滑取消" : "Release to send · slide up to cancel"}
+              </div>
+            </div>
+          )}
           <div className="box">
             <span style={{ fontSize: 18, color: "var(--mute)" }}>＋</span>
             <input
@@ -130,12 +160,16 @@ export function Chatbot() {
             />
             {speech.supported && (
               <button
-                className={`mic ${speech.listening ? "on" : ""}`}
-                onClick={speech.toggle}
-                aria-label="语音输入"
-                title={speech.listening ? "停止" : "语音输入"}
+                className={`mic ${speech.recording ? "on" : ""}`}
+                onPointerDown={micDown}
+                onPointerMove={micMove}
+                onPointerUp={micUp}
+                onPointerCancel={micUp}
+                aria-label={lang === "zh" ? "按住说话" : "Hold to talk"}
+                title={lang === "zh" ? "按住说话" : "Hold to talk"}
+                style={{ touchAction: "none" }}
               >
-                {speech.listening ? "■" : "🎤"}
+                🎤
               </button>
             )}
             <button className="send" disabled={streaming || !input.trim()} onClick={onSubmit} aria-label={t("send")}>
