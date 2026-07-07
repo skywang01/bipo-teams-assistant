@@ -20,7 +20,7 @@ export function App() {
           <div className="brand-slim" />
         ) : (
           <div className="brand">
-            <div className="logo">✦</div>
+            <div className="logo">B</div>
             <div>
               <div className="name">{t("appName")}</div>
               <div className="sub">{t("online")}</div>

@@ -32,7 +32,8 @@ function mdBold(s: string) {
 }
 
 export function Chatbot() {
-  const { engine, role, lang } = useStore();
+  const { engine, role, lang, toast } = useStore();
+  const [voiceMode, setVoiceMode] = useState(false); // 点麦克风进入"按住说话"模式
   const [entries, setEntries] = useState<Entry[]>([
     {
       kind: "agent",
@@ -83,10 +84,12 @@ export function Chatbot() {
   const speech = useSpeech(lang, (text) => void send(text));
   const [cancelArmed, setCancelArmed] = useState(false);
   const micStartY = useRef(0);
+  const micDownTime = useRef(0);
   const micDown = (e: ReactPointerEvent) => {
     e.preventDefault();
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     micStartY.current = e.clientY;
+    micDownTime.current = Date.now();
     setCancelArmed(false);
     speech.start();
   };
@@ -96,8 +99,12 @@ export function Chatbot() {
   };
   const micUp = () => {
     if (!speech.recording) return;
+    const elapsed = Date.now() - micDownTime.current;
     if (cancelArmed) speech.cancel();
-    else speech.finish();
+    else if (elapsed < 600) {
+      speech.cancel(); // 按太短 → 不发送, 提示重试
+      toast(lang === "zh" ? "说话时间太短，请重试" : "Too short, try again");
+    } else speech.finish();
     setCancelArmed(false);
   };
 
@@ -148,34 +155,52 @@ export function Chatbot() {
               </div>
             </div>
           )}
-          <div className="box">
-            <span style={{ fontSize: 18, color: "var(--mute)" }}>＋</span>
-            <input
-              value={input}
-              placeholder={t("composerPh")}
-              onChange={(ev) => setInput(ev.target.value)}
-              onKeyDown={(ev) => {
-                if (ev.key === "Enter") onSubmit();
-              }}
-            />
-            {speech.supported && (
+          {voiceMode ? (
+            <div className="voice-row">
+              <button className="kbd" onClick={() => setVoiceMode(false)} aria-label={lang === "zh" ? "切回键盘" : "Keyboard"}>
+                ⌨
+              </button>
               <button
-                className={`mic ${speech.recording ? "on" : ""}`}
+                className={`hold-bar ${speech.recording ? (cancelArmed ? "cancel" : "on") : ""}`}
                 onPointerDown={micDown}
                 onPointerMove={micMove}
                 onPointerUp={micUp}
                 onPointerCancel={micUp}
-                aria-label={lang === "zh" ? "按住说话" : "Hold to talk"}
-                title={lang === "zh" ? "按住说话" : "Hold to talk"}
                 style={{ touchAction: "none" }}
               >
-                🎤
+                {speech.recording
+                  ? cancelArmed
+                    ? lang === "zh" ? "松开 取消" : "Release to cancel"
+                    : lang === "zh" ? "松开 发送" : "Release to send"
+                  : lang === "zh" ? "按住 说话" : "Hold to talk"}
               </button>
-            )}
-            <button className="send" disabled={streaming || !input.trim()} onClick={onSubmit} aria-label={t("send")}>
-              ↑
-            </button>
-          </div>
+            </div>
+          ) : (
+            <div className="box">
+              <span style={{ fontSize: 18, color: "var(--mute)" }}>＋</span>
+              <input
+                value={input}
+                placeholder={t("composerPh")}
+                onChange={(ev) => setInput(ev.target.value)}
+                onKeyDown={(ev) => {
+                  if (ev.key === "Enter") onSubmit();
+                }}
+              />
+              {speech.supported && (
+                <button
+                  className="mic"
+                  onClick={() => setVoiceMode(true)}
+                  aria-label={lang === "zh" ? "语音输入" : "Voice input"}
+                  title={lang === "zh" ? "语音输入" : "Voice input"}
+                >
+                  🎤
+                </button>
+              )}
+              <button className="send" disabled={streaming || !input.trim()} onClick={onSubmit} aria-label={t("send")}>
+                ↑
+              </button>
+            </div>
+          )}
           <div className="sug">
             {suggestions.map((q) => (
               <span className="q" key={q} onClick={() => void send(q)}>
