@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useStore } from "../state/store";
 import { ChatActionsContext } from "./chatContext";
 import { A2UIRenderer } from "../a2ui/components";
+import { useSpeech } from "./useSpeech";
 import { t } from "../i18n";
 import type { Lang } from "../i18n";
 import type { AgentMessage, Role } from "../ai/types";
@@ -78,6 +79,9 @@ export function Chatbot() {
     setInput("");
   };
 
+  // 语音录入：识别文本实时填入输入框，用户复核后发送
+  const speech = useSpeech(lang, (text) => setInput(text));
+
   const suggestions = SUGGEST[role][lang];
 
   return (
@@ -124,6 +128,16 @@ export function Chatbot() {
                 if (ev.key === "Enter") onSubmit();
               }}
             />
+            {speech.supported && (
+              <button
+                className={`mic ${speech.listening ? "on" : ""}`}
+                onClick={speech.toggle}
+                aria-label="语音输入"
+                title={speech.listening ? "停止" : "语音输入"}
+              >
+                {speech.listening ? "■" : "🎤"}
+              </button>
+            )}
             <button className="send" disabled={streaming || !input.trim()} onClick={onSubmit} aria-label={t("send")}>
               ↑
             </button>
