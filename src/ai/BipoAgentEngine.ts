@@ -15,6 +15,7 @@
 // text 缓冲到本轮结束再解析。
 
 import type { AIEngine, AgentMessage, InvokeContext, MessageContent, Role } from "./types";
+import { authHeaders } from "./backend";
 
 export class BipoAgentEngine implements AIEngine {
   // 服务端签发的 session id，按角色分桶（EE / ER 会话隔离）。
@@ -27,7 +28,8 @@ export class BipoAgentEngine implements AIEngine {
   ) {}
 
   async *invoke(input: string, ctx: InvokeContext): AsyncIterable<AgentMessage> {
-    const headers: Record<string, string> = { "content-type": "application/json" };
+    // 直连模式带 x-service-key(authHeaders);代理模式为空(代理注入)。
+    const headers: Record<string, string> = { "content-type": "application/json", ...authHeaders() };
     if (this.token) headers["Authorization"] = `Bearer ${this.token}`;
 
     // [device_now] marker：LLM 不知道“今天”，所有相对日期（明天/下周三）都靠这个锚点。

@@ -1,7 +1,16 @@
 name: Deploy to GitHub Pages
 
-# push 到 main 自动构建（Mock 模式，纯静态、无后端）并部署到 GitHub Pages。
-# base 自动 = /<repo名>/，无需手填。产出地址：https://<用户>.github.io/<repo>/
+# push 到 main 自动构建并部署到 GitHub Pages。base 自动 = /<repo名>/。
+# 产出地址：https://<用户>.github.io/<repo>/
+#
+# 【C 模式 · 浏览器直连后端】构建为 real + direct：浏览器直接调 bipo-ai-test 并带 x-service-key。
+#   前置(缺一不可)：
+#     1. 后端 bipo-ai-service 已部署带 CORS(放行本 Pages 域名) —— 否则浏览器被 CORS 挡。
+#     2. 仓库 Settings → Secrets and variables → Actions:
+#          Secret   BIPO_SERVICE_KEY = sk_xxx     (service key)
+#          Variable BIPO_BASE_URL    = https://bipo-ai-test.bipocloud.com  (可选,有默认)
+#   ⚠️ direct 模式下 key 会进浏览器 bundle(线上 JS 可读) → 仅 POC;生产换 OAuth 并轮换此 key。
+#   BIPO_SERVICE_KEY 未配时 → 退回 mock 静态(语音走 Web Speech),不会泄露空 key。
 
 on:
   push:
@@ -27,10 +36,14 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      # Mock 模式：不设 VITE_AGENT_MODE=real。base 用仓库名子路径。
+      # C 模式：配了 BIPO_SERVICE_KEY 才切 real+direct;否则退回 mock(空 key 不泄露)。
       - run: npm run build
         env:
           VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_AGENT_MODE: ${{ secrets.BIPO_SERVICE_KEY != '' && 'real' || '' }}
+          VITE_BIPO_BASE_URL: ${{ vars.BIPO_BASE_URL || 'https://bipo-ai-test.bipocloud.com' }}
+          VITE_BIPO_SERVICE_KEY: ${{ secrets.BIPO_SERVICE_KEY }}
+          VITE_BIPO_AGENT_ID: ${{ vars.BIPO_AGENT_ID || 'attendance-ai' }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

@@ -10,6 +10,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import type { Lang } from "../i18n";
+import { API_BASE, authHeaders } from "../ai/backend";
 
 export interface Speech {
   supported: boolean;
@@ -129,9 +130,9 @@ export function useSpeech(lang: Lang, onFinal: (text: string) => void, onError?:
     setInterim(lang === "zh" ? "识别中…" : "Recognizing…");
     try {
       const audio = await blobToBase64(wav);
-      const res = await fetch("/api/stt", {
+      const res = await fetch(`${API_BASE}/api/stt`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: { "content-type": "application/json", ...authHeaders() },
         body: JSON.stringify({ audio, format: "wav", lang }),
       });
       if (!res.ok) throw new Error(String(res.status));
