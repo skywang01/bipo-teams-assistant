@@ -8,3 +8,6 @@ bot/dist
 
 # TS build cache
 tsconfig.tsbuildinfo
+
+# subagent-driven scratch
+.superpowers/

@@ -1,17 +1,15 @@
 // 全局 store：引擎（单例）、角色（EE/ER）、语言重渲染、toasts。
 // 角色切换会重置聊天会话（会话/历史按角色隔离，见 Chatbot / BipoAgentEngine）。
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { createEngine } from "../ai/engine";
-import type { AIEngine, Role } from "../ai/types";
+import type { Role } from "../ai/types";
 import { getLang, onLangChange, setLang } from "../i18n";
 import type { Lang } from "../i18n";
 
 export type ViewId = "chat" | "attendance" | "leave" | "claim" | "payroll";
 
 interface Store {
-  engine: AIEngine;
   role: Role;
   setRole: (r: Role) => void;
   lang: Lang;
@@ -30,7 +28,6 @@ interface Store {
 const Ctx = createContext<Store | null>(null);
 
 export function AppStoreProvider({ children }: { children: ReactNode }) {
-  const engine = useMemo(() => createEngine(), []);
   const [role, setRole] = useState<Role>("ee");
   const [lang, setLangState] = useState<Lang>(getLang());
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
@@ -57,7 +54,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value: Store = {
-    engine, role, setRole, lang, switchLang, toasts, toast,
+    role, setRole, lang, switchLang, toasts, toast,
     activeView, setActiveView, collapsed, toggleCollapsed,
     seedText, seedChat, consumeSeed,
   };

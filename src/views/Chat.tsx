@@ -7,6 +7,7 @@ import { useChat } from "../state/chat";
 import { useStore } from "../state/store";
 import { Composer } from "../chat/Composer";
 import { A2UIRenderer } from "../a2ui/components";
+import { ChatActionsContext } from "../chat/chatContext";
 import { Home } from "./Home";
 import type { AgentMessage } from "../ai/types";
 
@@ -36,6 +37,7 @@ export function Chat() {
   if (entries.length === 0) return <Home />;
 
   return (
+    <ChatActionsContext.Provider value={{ send: (q) => void send(q) }}>
     <div className="main">
       <div className="stream" ref={streamRef}>
         <div className="wrap">
@@ -68,6 +70,7 @@ export function Chat() {
       </div>
       <Composer variant="chat" onSent={scrollDown} />
     </div>
+    </ChatActionsContext.Provider>
   );
 }
 
