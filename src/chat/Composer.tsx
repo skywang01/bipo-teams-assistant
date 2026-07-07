@@ -30,12 +30,14 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
       let msg: string;
       if (reason === "not-allowed" || reason === "service-not-allowed")
         msg = zh ? "请允许麦克风权限后重试" : "Please allow microphone access";
-      else if (reason === "no-speech")
+      else if (reason === "no-speech" || reason === "no-result")
         msg = zh ? "没听清，请再说一次" : "Didn't catch that, try again";
+      else if (reason === "stt-failed")
+        msg = zh ? "语音识别服务未就绪，请稍后重试" : "Speech service unavailable, try again";
       else
         msg = zh
-          ? "此环境暂不支持浏览器语音识别（Teams 桌面端常见）；请用浏览器打开，或等接入服务端识别"
-          : "Speech recognition isn't available here (common in Teams desktop). Try a browser, or use server STT.";
+          ? "此环境暂不支持浏览器语音识别；请用浏览器打开，或接入服务端识别(/api/stt)"
+          : "Speech recognition isn't available here. Use a browser, or wire server STT (/api/stt).";
       toast(msg);
     },
   );
