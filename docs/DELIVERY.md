@@ -95,11 +95,17 @@
 - **真实后端模式**(`VITE_AGENT_MODE=real`):MediaRecorder 录音 → `POST /api/stt`(经代理/BFF 注入 service-key)→ 返回文本 → 发送。Teams/手机 WebView 均可用(=小程序做法)。
 - **mock/静态模式**:浏览器原生 Web Speech(仅浏览器,Teams 桌面端不支持 → 单条提示)。
 
-`/api/stt` 契约(对齐小程序):`POST { audio: <base64>, format }` → `{ text | result }`。
+后端(`bipo-ai-service/src/api/stt_routes.py`)= 腾讯云 ASR SentenceRecognition,
+`EngSerViceType=16k_zh`(16kHz 中文),`VoiceFormat` 透传,契约 `POST { audio:<base64>, format }` → `{ text }`。
+腾讯支持 wav/pcm/mp3/m4a/ogg-opus(**不支持 webm**),故前端产 **16kHz 单声道 WAV**(Web Audio 采集 + 降采样)。
 
-要在 **Teams 内真正可用语音**,需三步:
-1. 以 **real 模式**部署(BFF/代理转发 `/api/stt` 到 bipo-ai-service,注入 service-key)。
+**链路已实测**:dev(real 模式)POST 代理 `/api/stt` 哑 WAV → 返回 `{"text":""}` HTTP 200
+(鉴权/格式均 OK,腾讯对静音返回空)。真实说话即返回文本。
+
+要在 **Teams 内真正可用语音**,还需:
+1. 以 **real 模式**部署(BFF/代理转发 `/api/stt` 到 bipo-ai-service,注入 service-key;
+   bipo-ai-service 侧配 `TENCENT_SECRET_ID/KEY`)。
 2. Teams manifest 增 `"devicePermissions": ["media"]` → 重打 zip 重传(Teams 首次弹麦克风授权)。
-3. ⚠️ 确认后端 `/api/stt` 接受 Web 端音频格式(webm/opus 或 mp4);若仅支持 mp3,后端加转码或前端改 WAV 编码。
+3. ⚠️ 语言:腾讯引擎为 **16k_zh(中文)**;英文语音需后端把 `EngSerViceType` 改 `16k_en`(前端无法控制)。
 
-> 当前 GitHub Pages 是 mock 构建 → 语音走 Web Speech(浏览器可用)。切 real 部署后自动走 /api/stt。
+> 当前 GitHub Pages 是 mock 构建 → 语音走 Web Speech(浏览器可用)。切 real 部署后自动走 /api/stt(WAV)。
