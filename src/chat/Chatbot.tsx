@@ -125,7 +125,7 @@ export function Chatbot() {
                 </div>
               ) : (
                 <div className="row ai" key={e.id}>
-                  <div className="av ai">✦</div>
+                  <div className="av ai">B</div>
                   <div className="bubble full">
                     <AgentRender m={e.m} />
                   </div>
@@ -134,7 +134,7 @@ export function Chatbot() {
             )}
             {streaming && (
               <div className="row ai">
-                <div className="av ai">✦</div>
+                <div className="av ai">B</div>
                 <div className="typing">
                   <i /><i /><i />
                 </div>
