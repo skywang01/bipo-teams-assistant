@@ -3,21 +3,30 @@
 
 import { useStore } from "./state/store";
 import { Chatbot } from "./chat/Chatbot";
+import { isInTeams } from "./teams/teamsCtx";
 import { t } from "./i18n";
 
 export function App() {
   const { role, setRole, lang, switchLang, toasts } = useStore();
 
+  // 在 Teams 宿主内：Teams 标签栏已显示 app 名+图标，隐藏我们自己的品牌块避免重复；
+  // 独立访问(浏览器/Pages)：保留完整品牌块。角色/语言控件两种情况都保留。
+  const inTeams = isInTeams();
+
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand">
-          <div className="logo">✦</div>
-          <div>
-            <div className="name">{t("appName")}</div>
-            <div className="sub">{t("online")}</div>
+        {inTeams ? (
+          <div className="brand-slim" />
+        ) : (
+          <div className="brand">
+            <div className="logo">✦</div>
+            <div>
+              <div className="name">{t("appName")}</div>
+              <div className="sub">{t("online")}</div>
+            </div>
           </div>
-        </div>
+        )}
         <div className="controls">
           <div className="role-seg" role="tablist" aria-label={t("switchRole")}>
             <button className={role === "ee" ? "on" : ""} onClick={() => setRole("ee")}>

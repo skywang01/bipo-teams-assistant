@@ -13,14 +13,22 @@ export interface TeamsBoot {
   context?: app.Context;
 }
 
+// 模块级标记：是否运行在 Teams 宿主内。bootTeams() 在首次渲染前完成，故渲染时可直接读。
+let _inTeams = false;
+export function isInTeams(): boolean {
+  return _inTeams;
+}
+
 // 尝试初始化 Teams SDK；非 Teams 环境返回 inTeams:false，不抛错。
 export async function bootTeams(): Promise<TeamsBoot> {
   try {
     await app.initialize();
     const context = await app.getContext();
     app.notifySuccess();
+    _inTeams = true;
     return { inTeams: true, context };
   } catch {
+    _inTeams = false;
     return { inTeams: false };
   }
 }

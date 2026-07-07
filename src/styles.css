@@ -40,7 +40,7 @@ body { background: var(--page); color: var(--ink); }
 }
 .brand .name { font-weight: 700; font-size: 15px; }
 .brand .sub { font-size: 11px; color: var(--green); }
-.controls { display: flex; align-items: center; gap: 10px; }
+.controls { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 .role-seg { display: inline-flex; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
 .role-seg button {
   border: 0; background: transparent; padding: 5px 12px; border-radius: 999px;
