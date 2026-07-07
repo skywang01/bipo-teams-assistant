@@ -81,7 +81,23 @@ export function Chatbot() {
   };
 
   // 语音录入（对齐小程序）：按住说话、上滑取消、松开自动发送
-  const speech = useSpeech(lang, (text) => void send(text));
+  const speech = useSpeech(
+    lang,
+    (text) => void send(text),
+    (reason) => {
+      const zh = lang === "zh";
+      let msg: string;
+      if (reason === "not-allowed" || reason === "service-not-allowed")
+        msg = zh ? "请允许麦克风权限后重试" : "Please allow microphone access";
+      else if (reason === "no-speech")
+        msg = zh ? "没听清，请再说一次" : "Didn't catch that, try again";
+      else
+        msg = zh
+          ? "此环境暂不支持浏览器语音识别（Teams 桌面端常见）；请用浏览器打开，或等接入服务端识别"
+          : "Speech recognition isn't available here (common in Teams desktop). Try a browser, or use server STT.";
+      toast(msg);
+    },
+  );
   const [cancelArmed, setCancelArmed] = useState(false);
   const micStartY = useRef(0);
   const micDownTime = useRef(0);

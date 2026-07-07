@@ -18,7 +18,7 @@ export interface Speech {
   cancel: () => void; // 上滑取消：停止并丢弃
 }
 
-export function useSpeech(lang: Lang, onFinal: (text: string) => void): Speech {
+export function useSpeech(lang: Lang, onFinal: (text: string) => void, onError?: (reason: string) => void): Speech {
   const Rec = typeof window !== "undefined" ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition : undefined;
   const supported = !!Rec;
 
@@ -27,8 +27,11 @@ export function useSpeech(lang: Lang, onFinal: (text: string) => void): Speech {
   const recRef = useRef<any>(null);
   const transcriptRef = useRef("");
   const sendOnEndRef = useRef(false);
+  const gotResultRef = useRef(false);
   const onFinalRef = useRef(onFinal);
   onFinalRef.current = onFinal;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
   const start = useCallback(() => {
     if (!supported || recording) return;
@@ -37,8 +40,10 @@ export function useSpeech(lang: Lang, onFinal: (text: string) => void): Speech {
     rec.interimResults = true;
     rec.continuous = true; // 按住期间持续识别
     transcriptRef.current = "";
+    gotResultRef.current = false;
     setInterim("");
     rec.onresult = (e: any) => {
+      gotResultRef.current = true;
       let full = "";
       for (let i = 0; i < e.results.length; i++) full += e.results[i][0].transcript;
       transcriptRef.current = full;
@@ -48,11 +53,14 @@ export function useSpeech(lang: Lang, onFinal: (text: string) => void): Speech {
       setRecording(false);
       const text = transcriptRef.current.trim();
       if (sendOnEndRef.current && text) onFinalRef.current(text); // 松开且有内容 → 发送
+      // 松开发送但全程没拿到任何识别结果 → 多为环境不支持(Teams/WebView)或没说话
+      else if (sendOnEndRef.current && !gotResultRef.current) onErrorRef.current?.("no-result");
       setInterim("");
     };
-    rec.onerror = () => {
+    rec.onerror = (e: any) => {
       setRecording(false);
       setInterim("");
+      onErrorRef.current?.(e?.error || "error");
     };
     recRef.current = rec;
     try {
@@ -60,6 +68,7 @@ export function useSpeech(lang: Lang, onFinal: (text: string) => void): Speech {
       setRecording(true);
     } catch {
       setRecording(false);
+      onErrorRef.current?.("start-failed");
     }
   }, [Rec, supported, recording, lang]);
 
