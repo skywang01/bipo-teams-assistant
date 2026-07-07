@@ -3,10 +3,10 @@
 //        → POST /api/stt(服务端腾讯 ASR 一句话识别)→ 文本。Teams/手机 WebView 均可用。
 //   · 否则(mock/静态): 浏览器原生 Web Speech(仅浏览器可用, 作 demo 兜底)。
 //
-// 后端 /api/stt = 腾讯云 ASR SentenceRecognition, EngSerViceType=16k_zh(16kHz 中文),
-// VoiceFormat 透传。腾讯支持 wav/pcm/mp3/m4a/ogg-opus(不支持 webm), 故前端产 16kHz WAV。
-// 契约: POST { audio:<base64>, format:"wav" } → { text }; service-key 由代理/BFF 注入。
-// ⚠️ 引擎为中文(16k_zh); 英文语音需后端改 EngSerViceType(前端无法控制)。
+// 后端 /api/stt = 腾讯云 ASR SentenceRecognition, VoiceFormat 透传。
+// 腾讯支持 wav/pcm/mp3/m4a/ogg-opus(不支持 webm), 故前端产 16kHz WAV。
+// 契约: POST { audio:<base64>, format:"wav", lang:"zh"|"en" } → { text }; service-key 由代理/BFF 注入。
+// lang 透传当前界面语言, 供后端选 EngSerViceType(zh→16k_zh / en→16k_en); 后端未读该参数则回退默认。
 
 import { useCallback, useRef, useState } from "react";
 import type { Lang } from "../i18n";
@@ -132,7 +132,7 @@ export function useSpeech(lang: Lang, onFinal: (text: string) => void, onError?:
       const res = await fetch("/api/stt", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ audio, format: "wav" }),
+        body: JSON.stringify({ audio, format: "wav", lang }),
       });
       if (!res.ok) throw new Error(String(res.status));
       const data = await res.json();

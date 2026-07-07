@@ -128,6 +128,8 @@ Teams contentUrl 指向该 BFF(需公网 HTTPS)。详见 server/README.md。
 1. 把 `server/` 部署到公网 HTTPS(与 bipo-ai-service 同环境最简),Teams contentUrl 指过去。
    bipo-ai-service 侧配 `TENCENT_SECRET_ID/KEY`。
 2. Teams manifest 增 `"devicePermissions": ["media"]` → 重打 zip 重传(首次弹麦克风授权)。
-3. ⚠️ 语言:腾讯引擎为 **16k_zh(中文)**;英文语音需后端按 lang 切 `16k_en`(前端无法控制)。
+3. ⚠️ 语言:前端已在 `POST /api/stt` body 里透传 `lang:"zh"|"en"`(已实测 en/zh 均 200,后端容忍)。
+   **英文语音需 bipo-ai-service 读该 `lang` 选 `EngSerViceType`(zh→16k_zh / en→16k_en)**;
+   后端未接该参数前,仍按默认引擎(16k_zh 中文)。这是后端一处小改动。
 
 > GitHub Pages(mock)仍走 Web Speech(仅浏览器)。要 Teams/手机语音 → 用上面的 BFF real 部署。
