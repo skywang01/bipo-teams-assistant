@@ -104,6 +104,36 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
               : lang === "zh" ? "按住 说话" : "Hold to talk"}
           </button>
         </div>
+      ) : variant === "home" ? (
+        // Home: Copilot 式大输入框(多行 textarea + 底部操作行)
+        <div className="big-box">
+          <textarea
+            className="big-input"
+            value={input}
+            placeholder={t("composerPh")}
+            rows={2}
+            onChange={(ev) => setInput(ev.target.value)}
+            onKeyDown={(ev) => {
+              if (ev.key === "Enter" && !ev.shiftKey) {
+                ev.preventDefault();
+                onSubmit();
+              }
+            }}
+          />
+          <div className="big-bar">
+            <button className="big-plus" aria-label="+">＋</button>
+            <div className="big-right">
+              {speech.supported && (
+                <button className="mic" onClick={() => setVoiceMode(true)} aria-label={lang === "zh" ? "语音输入" : "Voice input"} title={lang === "zh" ? "语音输入" : "Voice input"}>
+                  🎤
+                </button>
+              )}
+              <button className="send" disabled={streaming || !input.trim()} onClick={onSubmit} aria-label={t("send")}>
+                ↑
+              </button>
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="box">
           <span style={{ fontSize: 18, color: "var(--mute)" }}>＋</span>
