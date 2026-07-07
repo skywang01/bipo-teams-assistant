@@ -6,6 +6,9 @@ export type Lang = "en" | "zh";
 const DICT = {
   appName: { en: "BIPO Assistant", zh: "BIPO 助手" },
   online: { en: "Online · agent-powered", zh: "在线 · 由 Agent 驱动" },
+  homeGreet: { en: "How can I help?", zh: "有什么可以帮你？" },
+  newChat: { en: "New chat", zh: "新建聊天" },
+  modules: { en: "HCM modules", zh: "HCM 模块" },
   roleEE: { en: "Employee", zh: "员工" },
   roleER: { en: "Manager", zh: "管理者" },
   switchRole: { en: "Switch role", zh: "切换角色" },
