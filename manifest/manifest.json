@@ -1,0 +1,57 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.17",
+  "version": "0.1.0",
+  "id": "REPLACE_WITH_TEAMS_APP_GUID",
+  "packageName": "com.bipo.assistant",
+  "developer": {
+    "name": "BIPO",
+    "websiteUrl": "https://www.biposervice.com",
+    "privacyUrl": "https://www.biposervice.com/privacy",
+    "termsOfUseUrl": "https://www.biposervice.com/terms"
+  },
+  "name": {
+    "short": "BIPO Assistant",
+    "full": "BIPO Assistant — HCM chat agent"
+  },
+  "description": {
+    "short": "Chat-first HCM assistant: punch, OT, leave, expense, payslip, approvals.",
+    "full": "BIPO Assistant lets employees and managers handle attendance, OT, leave, expense, payslip and approvals entirely through an AI chat with inline interactive cards — no menus, no forms."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#20307D",
+  "staticTabs": [
+    {
+      "entityId": "bipo-assistant-home",
+      "name": "Assistant",
+      "contentUrl": "https://REPLACE_WITH_TAB_DOMAIN/",
+      "websiteUrl": "https://REPLACE_WITH_TAB_DOMAIN/",
+      "scopes": ["personal"]
+    }
+  ],
+  "bots": [
+    {
+      "botId": "REPLACE_WITH_BOT_APP_GUID",
+      "scopes": ["personal"],
+      "isNotificationOnly": false,
+      "supportsFiles": false,
+      "commandLists": [
+        {
+          "scopes": ["personal"],
+          "commands": [
+            { "title": "notify", "description": "发送一张审批通知示例卡片" }
+          ]
+        }
+      ]
+    }
+  ],
+  "permissions": ["identity", "messageTeamMembers"],
+  "validDomains": ["REPLACE_WITH_TAB_DOMAIN"],
+  "webApplicationInfo": {
+    "id": "REPLACE_WITH_ENTRA_CLIENT_ID",
+    "resource": "api://REPLACE_WITH_TAB_DOMAIN/REPLACE_WITH_ENTRA_CLIENT_ID"
+  }
+}

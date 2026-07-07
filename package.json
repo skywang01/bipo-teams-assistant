@@ -1,0 +1,27 @@
+{
+  "name": "bipo-teams-assistant",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "BIPO Assistant — Teams app (chat-first HCM agent, EE/ER roles) backed by bipo-ai-service",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "pack:manifest": "cd manifest && zip -r ../bipo-assistant.manifest.zip manifest.json color.png outline.png"
+  },
+  "dependencies": {
+    "@microsoft/teams-js": "^2.31.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.4"
+  }
+}

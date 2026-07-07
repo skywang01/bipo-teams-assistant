@@ -1,0 +1,19 @@
+{
+  "name": "bipo-assistant-bot-sample",
+  "private": true,
+  "version": "0.1.0",
+  "description": "BIPO Assistant Bot sample — outbound notification/approval Adaptive Card demo",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts"
+  },
+  "dependencies": {
+    "botbuilder": "^4.23.1",
+    "restify": "^11.1.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.2",
+    "@types/restify": "^8.5.12"
+  }
+}

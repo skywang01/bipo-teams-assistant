@@ -1,0 +1,10 @@
+node_modules
+dist
+.env.local
+*.manifest.zip
+.DS_Store
+bot/node_modules
+bot/dist
+
+# TS build cache
+tsconfig.tsbuildinfo
