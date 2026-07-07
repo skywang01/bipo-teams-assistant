@@ -8,6 +8,8 @@ import type { AIEngine, Role } from "../ai/types";
 import { getLang, onLangChange, setLang } from "../i18n";
 import type { Lang } from "../i18n";
 
+export type ViewId = "chat" | "attendance" | "leave" | "claim" | "payroll";
+
 interface Store {
   engine: AIEngine;
   role: Role;
@@ -16,6 +18,13 @@ interface Store {
   switchLang: () => void;
   toasts: { id: number; text: string }[];
   toast: (text: string) => void;
+  activeView: ViewId;
+  setActiveView: (v: ViewId) => void;
+  collapsed: boolean;
+  toggleCollapsed: () => void;
+  seedText: string | null;
+  seedChat: (t: string) => void;
+  consumeSeed: () => string | null;
 }
 
 const Ctx = createContext<Store | null>(null);
@@ -25,6 +34,9 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>("ee");
   const [lang, setLangState] = useState<Lang>(getLang());
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
+  const [activeView, setActiveView] = useState<ViewId>("chat");
+  const [collapsed, setCollapsed] = useState(false);
+  const [seedText, setSeedText] = useState<string | null>(null);
 
   useEffect(() => onLangChange(() => setLangState(getLang())), []);
 
@@ -36,7 +48,19 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
   const switchLang = useCallback(() => setLang(getLang() === "en" ? "zh" : "en"), []);
 
-  const value: Store = { engine, role, setRole, lang, switchLang, toasts, toast };
+  const toggleCollapsed = useCallback(() => setCollapsed((c) => !c), []);
+  const seedChat = useCallback((t: string) => { setSeedText(t); setActiveView("chat"); }, []);
+  const consumeSeed = useCallback(() => {
+    let s: string | null = null;
+    setSeedText((c) => { s = c; return null; });
+    return s;
+  }, []);
+
+  const value: Store = {
+    engine, role, setRole, lang, switchLang, toasts, toast,
+    activeView, setActiveView, collapsed, toggleCollapsed,
+    seedText, seedChat, consumeSeed,
+  };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
