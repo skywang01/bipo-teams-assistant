@@ -1,0 +1,14 @@
+{
+  "name": "bipo-teams-assistant-bff",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Production BFF: serve dist + proxy /api to bipo-ai-service with server-side service-key",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "http-proxy-middleware": "^3.0.3"
+  }
+}

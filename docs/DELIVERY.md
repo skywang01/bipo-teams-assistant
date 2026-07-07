@@ -92,7 +92,7 @@
 ## 语音录入(STT)接入 /api/stt
 
 前端已双引擎(useSpeech):
-- **真实后端模式**(`VITE_AGENT_MODE=real`):MediaRecorder 录音 → `POST /api/stt`(经代理/BFF 注入 service-key)→ 返回文本 → 发送。Teams/手机 WebView 均可用(=小程序做法)。
+- **真实后端模式**(`VITE_AGENT_MODE=real`):Web Audio 采集 16kHz 单声道 WAV → `POST /api/stt`(经代理/BFF 注入 service-key)→ 返回文本 → 发送。Teams/手机 WebView 均可用(=小程序做法)。
 - **mock/静态模式**:浏览器原生 Web Speech(仅浏览器,Teams 桌面端不支持 → 单条提示)。
 
 后端(`bipo-ai-service/src/api/stt_routes.py`)= 腾讯云 ASR SentenceRecognition,
@@ -102,10 +102,32 @@
 **链路已实测**:dev(real 模式)POST 代理 `/api/stt` 哑 WAV → 返回 `{"text":""}` HTTP 200
 (鉴权/格式均 OK,腾讯对静音返回空)。真实说话即返回文本。
 
-要在 **Teams 内真正可用语音**,还需:
-1. 以 **real 模式**部署(BFF/代理转发 `/api/stt` 到 bipo-ai-service,注入 service-key;
-   bipo-ai-service 侧配 `TENCENT_SECRET_ID/KEY`)。
-2. Teams manifest 增 `"devicePermissions": ["media"]` → 重打 zip 重传(Teams 首次弹麦克风授权)。
-3. ⚠️ 语言:腾讯引擎为 **16k_zh(中文)**;英文语音需后端把 `EngSerViceType` 改 `16k_en`(前端无法控制)。
+### 为什么 Teams/手机里语音报"not available"
 
-> 当前 GitHub Pages 是 mock 构建 → 语音走 Web Speech(浏览器可用)。切 real 部署后自动走 /api/stt(WAV)。
+打开的是 **GitHub Pages 静态站 = mock 构建**,那里没有 `/api/stt` 后端,前端只能走浏览器
+Web Speech,而 Teams/企业微信/手机 WebView **不支持** Web Speech → 弹这条提示。这是**部署形态**
+所致,非前端 bug:WAV+`/api/stt` 只在【real 模式 + 有后端代理】的部署里生效。
+
+### 解法:生产 BFF(`server/`)—— 已本地跑通
+
+`server/`(Express + http-proxy-middleware)= 生产版 Vite proxy:托管 `dist` + 把 `/api/*`
+转发到 bipo-ai-service 并**服务端注入 `x-service-key`**。以 real 模式部署后 chat 与语音皆真。
+
+```
+构建: VITE_AGENT_MODE=real VITE_BASE=/ npm run build
+起服务: cd server && npm install
+        BIPO_TARGET=… BIPO_SERVICE_KEY=… PORT=8080 npm start
+Teams contentUrl 指向该 BFF(需公网 HTTPS)。详见 server/README.md。
+```
+
+**已实测(通过 BFF,非 Vite)**:real 构建 → `server` 起(service-key set)→ `POST /api/stt`
+哑 WAV 返回 `{"text":""}` HTTP 200,`GET /` 返回 dist HTTP 200。生产路径打通,真实说话即返回文本。
+
+### 仍需(部署侧)
+
+1. 把 `server/` 部署到公网 HTTPS(与 bipo-ai-service 同环境最简),Teams contentUrl 指过去。
+   bipo-ai-service 侧配 `TENCENT_SECRET_ID/KEY`。
+2. Teams manifest 增 `"devicePermissions": ["media"]` → 重打 zip 重传(首次弹麦克风授权)。
+3. ⚠️ 语言:腾讯引擎为 **16k_zh(中文)**;英文语音需后端按 lang 切 `16k_en`(前端无法控制)。
+
+> GitHub Pages(mock)仍走 Web Speech(仅浏览器)。要 Teams/手机语音 → 用上面的 BFF real 部署。
