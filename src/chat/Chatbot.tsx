@@ -99,22 +99,27 @@ export function Chatbot() {
     },
   );
   const [cancelArmed, setCancelArmed] = useState(false);
+  const [holding, setHolding] = useState(false); // 手指按住状态(驱动浮层, 与语音引擎解耦)
   const micStartY = useRef(0);
   const micDownTime = useRef(0);
   const micDown = (e: ReactPointerEvent) => {
     e.preventDefault();
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
     micStartY.current = e.clientY;
     micDownTime.current = Date.now();
     setCancelArmed(false);
-    speech.start();
+    setHolding(true); // 立即显示浮层, 不依赖识别是否成功启动
+    speech.start(); // 尝试启动识别(浏览器可用; Teams 桌面端不支持则松开时提示)
   };
   const micMove = (e: ReactPointerEvent) => {
-    if (!speech.recording) return;
+    if (!holding) return;
     setCancelArmed(micStartY.current - e.clientY > 60); // 上滑超过 60px = 取消
   };
   const micUp = () => {
-    if (!speech.recording) return;
+    if (!holding) return;
+    setHolding(false);
     const elapsed = Date.now() - micDownTime.current;
     if (cancelArmed) speech.cancel();
     else if (elapsed < 600) {
@@ -160,7 +165,7 @@ export function Chatbot() {
         </div>
 
         <div className="composer">
-          {speech.recording && (
+          {holding && (
             <div className={`rec-overlay ${cancelArmed ? "cancel" : ""}`}>
               <div className="rec-mic">🎙️</div>
               <div className="rec-text">{speech.interim || (lang === "zh" ? "正在聆听…" : "Listening…")}</div>
@@ -177,14 +182,15 @@ export function Chatbot() {
                 ⌨
               </button>
               <button
-                className={`hold-bar ${speech.recording ? (cancelArmed ? "cancel" : "on") : ""}`}
+                className={`hold-bar ${holding ? (cancelArmed ? "cancel" : "on") : ""}`}
                 onPointerDown={micDown}
                 onPointerMove={micMove}
                 onPointerUp={micUp}
                 onPointerCancel={micUp}
+                onLostPointerCapture={micUp}
                 style={{ touchAction: "none" }}
               >
-                {speech.recording
+                {holding
                   ? cancelArmed
                     ? lang === "zh" ? "松开 取消" : "Release to cancel"
                     : lang === "zh" ? "松开 发送" : "Release to send"
