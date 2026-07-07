@@ -3,6 +3,7 @@
 
 import { useStore } from "./state/store";
 import { Sidebar } from "./shell/Sidebar";
+import { TopBar } from "./shell/TopBar";
 import { Chat } from "./views/Chat";
 import { AttendancePage } from "./hcm/AttendancePage";
 import { LeavePage } from "./hcm/LeavePage";
@@ -22,7 +23,10 @@ export function App() {
   return (
     <div className="shell">
       <Sidebar />
-      <main className="content">{main}</main>
+      <main className="content">
+        <TopBar />
+        <div className="content-body">{main}</div>
+      </main>
       <div className="toasts">
         {toasts.map((x) => (
           <div className="toast" key={x.id}>{x.text}</div>

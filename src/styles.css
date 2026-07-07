@@ -2,15 +2,16 @@
    目标：在 Teams 桌面/网页/移动端都自然，聊天优先，A2UI 卡片内联。 */
 
 :root {
-  --navy: #20307d;
-  --indigo: #2a63e6;
-  --indigo-soft: #eaf0ff;
+  --navy: #2f3aa0;       /* HCM 深靛蓝 */
+  --indigo: #3d4eb0;     /* HCM 主色 royal indigo(对齐原系统顶栏) */
+  --indigo-soft: #eaecfa;/* 主色浅底(active/hover) */
+  --gold: #f5c13b;       /* HCM 品牌金(菜单头/强调) */
   --ink: #1c2333;
   --slate: #5b6478;
   --mute: #9aa3b5;
   --line: #e6e9f0;
-  --page: #ffffff;      /* 主背景(内容区, 干净白) */
-  --side: #f6f7fa;      /* 侧边栏浅灰(与白色内容区区分) */
+  --page: #ffffff;      /* 内容区白底(对齐 HCM) */
+  --side: #f6f7fa;      /* 菜单浅灰(与白内容区区分) */
   --bg: #f5f7fb;
   --stream-bg: #fbfcfe; /* 对话区背景(极浅, 近白) */
   --card: #ffffff;
@@ -199,11 +200,12 @@ body { background: var(--page); color: var(--ink); }
 .shell { display: flex; height: 100%; width: 100%; background: var(--card); }
 .sidebar { width: 248px; flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 12px 10px; background: var(--side); border-right: 1px solid var(--line); transition: width .15s ease; }
 .sidebar.collapsed { width: 64px; }
-.side-top { display: flex; align-items: center; justify-content: space-between; min-height: 34px; margin-bottom: 4px; }
+/* 菜单顶部金色 banner(对齐 HCM "BIPO" 金头, 边到边) */
+.side-top { display: flex; align-items: center; justify-content: space-between; margin: -12px -10px 10px; padding: 16px 14px; background: linear-gradient(135deg, #f8d979, #f3bd33); }
 .side-brand { display: flex; align-items: center; gap: 8px; }
-.side-logo { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-weight: 800; background: linear-gradient(135deg, var(--indigo), var(--navy)); }
-.side-name { font-weight: 700; font-size: 14px; }
-.side-collapse { border: 1px solid var(--line); background: #fff; border-radius: 8px; width: 28px; height: 28px; cursor: pointer; color: var(--slate); }
+.side-name { font-weight: 800; font-size: 17px; color: var(--navy); letter-spacing: .5px; }
+.side-name .sub { font-weight: 700; font-size: 12px; opacity: .75; margin-left: 3px; }
+.side-collapse { border: 0; background: rgba(255,255,255,.45); border-radius: 8px; width: 28px; height: 28px; cursor: pointer; color: var(--navy); font-weight: 700; }
 .side-newchat { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 9px 12px; font-size: 13.5px; font-weight: 600; color: var(--ink); cursor: pointer; }
 .side-newchat.on { border-color: var(--indigo); color: var(--indigo); }
 .side-group { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
@@ -283,3 +285,13 @@ body { background: var(--page); color: var(--ink); }
 .composer.home { display: block; width: 100%; }
 .composer.home .big-box { width: 100%; max-width: none; margin: 0; }
 .home-inner { width: min(760px, 94%); }
+
+/* ============ 顶部 HCM 式靛蓝标题栏 ============ */
+.hbar { display: flex; align-items: center; gap: 12px; height: 54px; padding: 0 18px; background: var(--indigo); color: #fff; flex: 0 0 auto; }
+.hbar-title { font-size: 16px; font-weight: 700; }
+.hbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.hbar-search { border: 0; border-radius: 8px; padding: 7px 12px; font-size: 13px; width: 200px; background: rgba(255,255,255,.95); color: var(--ink); outline: 0; }
+.hbar-badge { background: var(--gold); color: var(--navy); font-weight: 800; font-size: 12px; border-radius: 6px; padding: 4px 9px; }
+.hbar-ic { width: 30px; height: 30px; border-radius: 8px; background: rgba(255,255,255,.18); display: grid; place-items: center; cursor: pointer; border: 0; color: #fff; font-size: 14px; }
+.content-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+@media (max-width: 640px) { .hbar-search { display: none; } }

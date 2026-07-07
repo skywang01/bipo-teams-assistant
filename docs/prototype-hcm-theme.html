@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BIPO Assistant · HCM 主题原型</title>
+<style>
+  :root{
+    --navy:#2f3aa0; --indigo:#3d4eb0; --indigo-soft:#eaecfa; --gold:#f5c13b;
+    --ink:#1c2333; --slate:#5b6478; --mute:#9aa3b5; --line:#e6e9f0;
+    --page:#ffffff;   /* 内容区白底(对齐 HCM 实际) */
+    --side:#f6f7fa;   /* 菜单浅灰(与白内容区区分) */
+    --card:#ffffff; --red:#e5484d; --amber:#d9822b; --green:#23a06b;
+    --shadow:0 1px 3px rgba(20,30,60,.08),0 6px 18px rgba(20,30,60,.06);
+    font-family:"Segoe UI",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box} html,body{height:100%;margin:0}
+  body{background:var(--page);color:var(--ink)}
+  .shell{display:flex;height:100vh;background:var(--page)}
+  /* Sidebar */
+  .sidebar{width:248px;flex:0 0 auto;display:flex;flex-direction:column;gap:6px;padding:12px 10px;background:var(--side);border-right:1px solid var(--line)}
+  /* 菜单顶部金色 banner(对齐 HCM "BIPO" 金头) */
+  .side-top{display:flex;align-items:center;justify-content:space-between;margin:-12px -10px 10px;padding:16px 14px;background:linear-gradient(135deg,#f8d979,#f3bd33)}
+  .side-brand{display:flex;align-items:center;gap:8px}
+  .side-name{font-weight:800;font-size:17px;color:var(--navy);letter-spacing:.5px}
+  .side-name .sub{font-weight:700;font-size:12px;opacity:.75;margin-left:2px}
+  .side-collapse{border:0;background:rgba(255,255,255,.45);border-radius:8px;width:28px;height:28px;cursor:pointer;color:var(--navy);font-weight:700}
+  .side-newchat{display:flex;align-items:center;gap:8px;border:1px solid var(--indigo);background:#fff;border-radius:10px;padding:9px 12px;font-size:13.5px;font-weight:600;color:var(--indigo);cursor:pointer}
+  .side-group-label{font-size:11px;color:var(--mute);padding:10px 12px 2px}
+  .side-item{display:flex;align-items:center;gap:10px;border:0;background:transparent;border-radius:9px;padding:9px 12px;font-size:13.5px;color:var(--slate);cursor:pointer;text-align:left;border-left:3px solid transparent}
+  .side-item .ic{font-size:16px;width:18px;text-align:center}
+  .side-item.on{background:var(--indigo-soft);color:var(--indigo);font-weight:600;border-left:3px solid var(--gold)}
+  .side-foot{margin-top:auto;display:flex;align-items:center;gap:8px;padding-top:8px;border-top:1px solid var(--line)}
+  .role-seg{display:inline-flex;background:var(--page);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .role-seg button{border:0;background:transparent;padding:5px 12px;border-radius:999px;font-size:12.5px;color:var(--slate);cursor:pointer}
+  .role-seg button.on{background:var(--indigo);color:#fff;font-weight:600}
+  .lang{border:1px solid var(--line);background:#fff;color:var(--slate);border-radius:8px;width:34px;height:30px;cursor:pointer;font-weight:600}
+  /* Content */
+  .content{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--page)}
+  .content-scroll{flex:1;overflow:auto;background:var(--page)}
+  /* 顶部 HCM 式靛蓝标题栏 */
+  .topbar{display:flex;align-items:center;gap:12px;height:56px;padding:0 18px;background:var(--indigo);color:#fff;flex:0 0 auto}
+  .tb-title{font-size:17px;font-weight:700}
+  .tb-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .tb-search{border:0;border-radius:8px;padding:7px 12px;font-size:13px;width:220px;background:rgba(255,255,255,.95);color:var(--ink)}
+  .tb-badge{background:var(--gold);color:var(--navy);font-weight:800;font-size:12px;border-radius:6px;padding:4px 9px}
+  .tb-user{font-size:13px;font-weight:600}
+  .tb-ic{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.18);display:grid;place-items:center;cursor:pointer}
+  .res{padding:22px;max-width:900px;margin:0 auto}
+  .res-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .res-ic{font-size:22px} .res-head h2{font-size:20px;font-weight:800;margin:0}
+  .res-shortcuts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .res-sc-label{font-size:12px;color:var(--mute)}
+  .res-sc{border:1px solid var(--indigo);color:var(--indigo);background:#fff;border-radius:999px;padding:6px 12px;font-size:12.5px;cursor:pointer}
+  .res-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+  .res-tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow)}
+  .res-tile .l{font-size:12px;color:var(--slate)} .res-tile .v{font-size:20px;font-weight:800;margin-top:2px}
+  .res-section{margin-top:18px} .res-section-h{font-size:13px;font-weight:700;color:var(--slate);margin-bottom:8px}
+  .a2ui{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+  .a2ui .h{display:flex;align-items:center;gap:8px;padding:11px 14px;font-weight:600;font-size:14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fbfcff,#fff)}
+  .a2ui .h .badge{margin-left:auto;font-size:10px;color:var(--indigo);background:var(--indigo-soft);padding:2px 7px;border-radius:999px;font-weight:600}
+  .a2ui .bd{padding:14px;display:flex;flex-direction:column;gap:10px}
+  .clock{text-align:center;font-size:30px;font-weight:800;color:var(--navy)}
+  .loc{text-align:center;font-size:12px;color:var(--slate)}
+  .bb{border:0;border-radius:10px;padding:10px;font-size:13.5px;font-weight:600;cursor:pointer;background:var(--indigo);color:#fff}
+  .res-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+  .res-table th,.res-table td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}
+  .res-table th{color:var(--slate);font-weight:600}
+  .st{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px}
+  .st.normal{background:#e8f7f0;color:var(--green)} .st.late{background:#fff7ec;color:var(--amber)}
+  .st.ot{background:var(--indigo-soft);color:var(--indigo)} .st.leave{background:#eef;color:var(--navy)}
+  /* Home preview (bottom) */
+  .home{padding:40px 22px;text-align:center;border-top:1px dashed var(--line);background:var(--page)}
+  .home h1{font-size:28px;font-weight:800;margin:0 0 18px}
+  .big-box{max-width:640px;margin:0 auto;border:1px solid var(--line);border-radius:24px;background:#fff;box-shadow:var(--shadow);padding:16px 18px 12px;text-align:left}
+  .big-input{color:var(--mute);font-size:15px;min-height:40px}
+  .big-bar{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+  .rbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--slate);display:grid;place-items:center}
+  .rbtn.send{background:var(--indigo);color:#fff;border:0}
+  .sug{max-width:640px;margin:12px auto 0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .q{font-size:12px;color:var(--indigo);background:var(--indigo-soft);border-radius:999px;padding:5px 11px}
+</style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="side-top">
+        <div class="side-brand"><span class="side-name">BIPO<span class="sub">助手</span></span></div>
+        <button class="side-collapse">«</button>
+      </div>
+      <button class="side-newchat"><span>✎</span><span>新建聊天</span></button>
+      <div class="side-group-label">HCM 模块</div>
+      <button class="side-item on"><span class="ic">🕐</span><span>考勤</span></button>
+      <button class="side-item"><span class="ic">🌴</span><span>休假</span></button>
+      <button class="side-item"><span class="ic">🧾</span><span>报销</span></button>
+      <button class="side-item"><span class="ic">💰</span><span>薪资</span></button>
+      <div class="side-foot">
+        <div class="role-seg"><button class="on">员工</button><button>管理者</button></div>
+        <button class="lang">中</button>
+      </div>
+    </aside>
+
+    <div class="content">
+      <div class="topbar">
+        <div class="tb-title">考勤</div>
+        <div class="tb-right">
+          <input class="tb-search" placeholder="搜索…" />
+          <span class="tb-badge">SG</span>
+          <span class="tb-user">sky.wang</span>
+          <span class="tb-ic">👤</span>
+          <span class="tb-ic">?</span>
+        </div>
+      </div>
+      <div class="content-scroll">
+      <!-- 资源页样张 -->
+      <div class="res">
+        <div class="res-head"><span class="res-ic">🕐</span><h2>考勤</h2></div>
+        <div class="res-shortcuts"><span class="res-sc-label">让 AI 代办：</span>
+          <button class="res-sc">让 AI 帮我打卡</button><button class="res-sc">申请 OT</button></div>
+        <div class="res-tiles">
+          <div class="res-tile"><div class="l">本月出勤</div><div class="v">18</div></div>
+          <div class="res-tile"><div class="l">迟到</div><div class="v">1</div></div>
+          <div class="res-tile"><div class="l">OT(h)</div><div class="v">6</div></div>
+          <div class="res-tile"><div class="l">缺勤</div><div class="v">0</div></div>
+        </div>
+        <div class="res-section"><div class="res-section-h">今日打卡</div>
+          <div class="a2ui"><div class="h">🕐 打卡 Clock Punch<span class="badge">A2UI · clock_punch</span></div>
+            <div class="bd"><div class="clock">14:57</div><div class="loc">📍 当前位置 · 2026-07-07 (Mon)</div>
+              <button class="bb">✓ 确认</button></div></div></div>
+        <div class="res-section"><div class="res-section-h">本月记录</div>
+          <table class="res-table"><thead><tr><th>日期</th><th>上班</th><th>下班</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>07-07 Mon</td><td>09:02</td><td>—</td><td><span class="st late">迟到</span></td></tr>
+            <tr><td>07-04 Fri</td><td>08:55</td><td>18:10</td><td><span class="st normal">正常</span></td></tr>
+            <tr><td>07-03 Thu</td><td>08:50</td><td>20:30</td><td><span class="st ot">OT</span></td></tr>
+            <tr><td>07-01 Tue</td><td>—</td><td>—</td><td><span class="st leave">休假</span></td></tr>
+          </tbody></table></div>
+      </div>
+
+      <!-- Home 着陆样张 -->
+      <div class="home">
+        <h1>有什么可以帮你？</h1>
+        <div class="big-box">
+          <div class="big-input">问我任何事 —— 打卡、OT、休假、报销、工资单…</div>
+          <div class="big-bar"><span class="rbtn">＋</span><span style="display:flex;gap:8px"><span class="rbtn">🎤</span><span class="rbtn send">↑</span></span></div>
+        </div>
+        <div class="sug"><span class="q">我要打卡</span><span class="q">申请明天 19:00-21:00 OT</span><span class="q">请下周三年假一天</span><span class="q">报销昨天打车 68 元</span><span class="q">查上月工资单</span></div>
+      </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
