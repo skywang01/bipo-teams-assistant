@@ -9,9 +9,10 @@
   --slate: #5b6478;
   --mute: #9aa3b5;
   --line: #e6e9f0;
-  --page: #e7ebf3;      /* 主背景(页面/App 外围) */
+  --page: #ffffff;      /* 主背景(内容区, 干净白) */
+  --side: #f6f7fa;      /* 侧边栏浅灰(与白色内容区区分) */
   --bg: #f5f7fb;
-  --stream-bg: #f3f6fc; /* 对话区背景(与白色顶栏/输入区区分) */
+  --stream-bg: #fbfcfe; /* 对话区背景(极浅, 近白) */
   --card: #ffffff;
   --red: #e5484d;
   --amber: #d9822b;
@@ -195,8 +196,8 @@ body { background: var(--page); color: var(--ink); }
 }
 
 /* ============ Shell (Sidebar + Main) ============ */
-.shell { display: flex; height: 100%; }
-.sidebar { width: 248px; flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 12px 10px; background: var(--card); border-right: 1px solid var(--line); transition: width .15s ease; }
+.shell { display: flex; height: 100%; width: 100%; background: var(--card); }
+.sidebar { width: 248px; flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 12px 10px; background: var(--side); border-right: 1px solid var(--line); transition: width .15s ease; }
 .sidebar.collapsed { width: 64px; }
 .side-top { display: flex; align-items: center; justify-content: space-between; min-height: 34px; margin-bottom: 4px; }
 .side-brand { display: flex; align-items: center; gap: 8px; }

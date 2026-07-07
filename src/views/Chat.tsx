@@ -17,16 +17,21 @@ function mdBold(s: string) {
 
 export function Chat() {
   const { entries, streaming, send } = useChat();
-  const { consumeSeed } = useStore();
+  const { seedText, consumeSeed } = useStore();
   const streamRef = useRef<HTMLDivElement>(null);
+  const seedSentRef = useRef(false); // 防 StrictMode 双调导致重复发送
 
   const scrollDown = () =>
     requestAnimationFrame(() => streamRef.current?.scrollTo({ top: streamRef.current.scrollHeight, behavior: "smooth" }));
 
-  // 挂载时消费快捷入口种子(资源页跳聊天), 自动发送
+  // 挂载时消费快捷入口种子(资源页跳聊天), 自动发送一次。直接读 seedText(而非 consumeSeed 返回值,
+  // 因 setState 更新器非同步返回)；ref 守卫确保只发一次(StrictMode 开发期会双调副作用)。
   useEffect(() => {
-    const s = consumeSeed();
-    if (s) void send(s);
+    if (seedText && !seedSentRef.current) {
+      seedSentRef.current = true;
+      void send(seedText);
+      consumeSeed();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
