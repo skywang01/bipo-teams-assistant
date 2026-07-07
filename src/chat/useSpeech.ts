@@ -28,6 +28,7 @@ export function useSpeech(lang: Lang, onFinal: (text: string) => void, onError?:
   const transcriptRef = useRef("");
   const sendOnEndRef = useRef(false);
   const gotResultRef = useRef(false);
+  const erroredRef = useRef(false); // 已报过错则 onend 不再重复报(避免双弹)
   const onFinalRef = useRef(onFinal);
   onFinalRef.current = onFinal;
   const onErrorRef = useRef(onError);
@@ -41,6 +42,7 @@ export function useSpeech(lang: Lang, onFinal: (text: string) => void, onError?:
     rec.continuous = true; // 按住期间持续识别
     transcriptRef.current = "";
     gotResultRef.current = false;
+    erroredRef.current = false;
     setInterim("");
     rec.onresult = (e: any) => {
       gotResultRef.current = true;
@@ -53,13 +55,14 @@ export function useSpeech(lang: Lang, onFinal: (text: string) => void, onError?:
       setRecording(false);
       const text = transcriptRef.current.trim();
       if (sendOnEndRef.current && text) onFinalRef.current(text); // 松开且有内容 → 发送
-      // 松开发送但全程没拿到任何识别结果 → 多为环境不支持(Teams/WebView)或没说话
-      else if (sendOnEndRef.current && !gotResultRef.current) onErrorRef.current?.("no-result");
+      // 松开发送但全程没拿到结果, 且未报过错 → 多为环境不支持(Teams/WebView)或没说话
+      else if (sendOnEndRef.current && !gotResultRef.current && !erroredRef.current) onErrorRef.current?.("no-result");
       setInterim("");
     };
     rec.onerror = (e: any) => {
       setRecording(false);
       setInterim("");
+      erroredRef.current = true;
       onErrorRef.current?.(e?.error || "error");
     };
     recRef.current = rec;

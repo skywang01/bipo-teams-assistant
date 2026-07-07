@@ -266,9 +266,11 @@ body { background: var(--page); color: var(--ink); }
 .daily-st.leave { background: var(--indigo-soft); color: var(--indigo); }
 .daily-st.ot { background: #eef; color: var(--navy); }
 
+/* 窄屏折叠由 store 的 collapsed 状态控制(见 .sidebar.collapsed), 此处仅收紧内边距 */
 @media (max-width: 640px) {
-  .sidebar { width: 60px; }
-  .sidebar .side-name, .sidebar .side-group-label, .sidebar .side-item span:not(.ic), .sidebar .side-newchat span:not(.ic) { display: none; }
+  .res { padding: 16px; }
+  .home { padding: 16px; }
+  .hbar { padding: 0 12px; }
 }
 
 /* ============ Home 大输入框(Copilot 式) ============ */

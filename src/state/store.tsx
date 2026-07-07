@@ -32,7 +32,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(getLang());
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
   const [activeView, setActiveView] = useState<ViewId>("chat");
-  const [collapsed, setCollapsed] = useState(false);
+  // 窄屏(手机/Teams 移动端)默认折叠侧栏为图标栏, 避免挤压内容
+  const [collapsed, setCollapsed] = useState(() => typeof window !== "undefined" && window.innerWidth < 700);
   const [seedText, setSeedText] = useState<string | null>(null);
 
   useEffect(() => onLangChange(() => setLangState(getLang())), []);
