@@ -65,7 +65,7 @@ export const SCRIPTS: Script[] = [
   },
   // OT 申请
   {
-    match: (q, role) => role === "ee" && /(申请|提交|报).*(ot|加班)|加班申请|ot申请/i.test(q),
+    match: (q, role) => role === "ee" && /(申请|提交|报).*(ot|加班)|加班申请|ot申请|file.*ot|apply.*ot|request.*ot|log.*ot|overtime/i.test(q),
     build: () => [
       text("好的，帮你发起 OT 申请。请补全并确认（我已按今天预填，可修改）："),
       out("ot_request", { date: todayISO(), start: "19:00", end: "21:00", reason: "", hours: 2 }),
@@ -100,7 +100,7 @@ export const SCRIPTS: Script[] = [
   /* ============ ER 管理者功能 ============ */
   // 批量审批 OT
   {
-    match: (q, role) => role === "manager" && /(审批|批准|处理).*(ot|加班)|待审批|批量.*ot/i.test(q),
+    match: (q, role) => role === "manager" && /(审批|批准|处理).*(ot|加班)|待审批|批量.*ot|pending.*ot|ot.*approv|approve.*ot/i.test(q),
     build: () => [
       text(`当前有 **${pendingOt.length} 笔待审批 OT**，其中 2 笔有合规提醒。可逐条或批量处理：`),
       out("ot_pending_list", { rows: pendingOt }),
@@ -116,7 +116,7 @@ export const SCRIPTS: Script[] = [
   },
   // 批量审批休假
   {
-    match: (q, role) => role === "manager" && /(审批|批准|处理).*(休假|请假|leave)|待审批.*假/i.test(q),
+    match: (q, role) => role === "manager" && /(审批|批准|处理).*(休假|请假|leave)|待审批.*假|pending.*leave|leave.*approv|approve.*leave/i.test(q),
     build: () => [
       text(`有 **${pendingLeave.length} 笔待审批休假**。王五的病假缺附件，已标注：`),
       out("leave_pending_list", { rows: pendingLeave }),

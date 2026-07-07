@@ -3,7 +3,6 @@
   "manifestVersion": "1.17",
   "version": "0.1.0",
   "id": "__APP_ID__",
-  "packageName": "com.bipo.assistant",
   "developer": {
     "name": "BIPO",
     "websiteUrl": "https://www.biposervice.com",
@@ -29,6 +28,5 @@
       "scopes": ["personal"]
     }
   ],
-  "permissions": ["identity"],
   "validDomains": ["__TAB_HOST__"]
 }
