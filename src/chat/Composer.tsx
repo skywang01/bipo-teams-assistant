@@ -7,6 +7,17 @@ import { useChat } from "../state/chat";
 import { useSpeech } from "./useSpeech";
 import { t } from "../i18n";
 
+// 线条麦克风图标(替代 emoji <MicIcon />, 更整洁, 随按钮 currentColor 变色/录音变白)
+function MicIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="22" />
+    </svg>
+  );
+}
+
 export function Composer({ variant = "chat", onSent }: { variant?: "home" | "chat"; onSent?: () => void }) {
   const { lang, toast } = useStore();
   const { send, streaming } = useChat();
@@ -127,7 +138,7 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
             <div className="big-right">
               {speech.supported && (
                 <button className="mic" onClick={() => setVoiceMode(true)} aria-label={lang === "zh" ? "语音输入" : "Voice input"} title={lang === "zh" ? "语音输入" : "Voice input"}>
-                  🎤
+                  <MicIcon />
                 </button>
               )}
               {input.trim() && (
@@ -156,7 +167,7 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
               aria-label={lang === "zh" ? "语音输入" : "Voice input"}
               title={lang === "zh" ? "语音输入" : "Voice input"}
             >
-              🎤
+              <MicIcon />
             </button>
           )}
           {input.trim() && (
