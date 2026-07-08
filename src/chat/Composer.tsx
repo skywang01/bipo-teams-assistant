@@ -1,5 +1,6 @@
-// 可复用输入组件：从 Chatbot 抽出的输入区(文本框/语音模式/发送)，Home 与 Chat 共用。
+// 可复用输入组件：从 Chatbot 抽出的输入区(文本框 + 麦克风 + 发送)，Home 与 Chat 共用。
 // variant 仅影响外层 className（home 居中大号 / chat 底部固定），文本+语音逻辑完全一致。
+// 语音：直接按住麦克风即录音、上滑取消、松开发送(无中间"切换到 hold-to-talk"步骤)。
 
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { useStore } from "../state/store";
@@ -7,7 +8,7 @@ import { useChat } from "../state/chat";
 import { useSpeech } from "./useSpeech";
 import { t } from "../i18n";
 
-// 线条麦克风图标(替代 emoji <MicIcon />, 更整洁, 随按钮 currentColor 变色/录音变白)
+// 线条麦克风图标(替代 emoji, 更整洁, 随按钮 currentColor 变色/录音变白)
 function MicIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -21,7 +22,6 @@ function MicIcon() {
 export function Composer({ variant = "chat", onSent }: { variant?: "home" | "chat"; onSent?: () => void }) {
   const { lang, toast } = useStore();
   const { send, streaming } = useChat();
-  const [voiceMode, setVoiceMode] = useState(false); // 点麦克风进入"按住说话"模式
   const [input, setInput] = useState("");
 
   const onSubmit = () => {
@@ -30,7 +30,7 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
     void send(q).then(() => onSent?.());
   };
 
-  // 语音录入（对齐小程序）：按住说话、上滑取消、松开自动发送
+  // 语音录入（对齐小程序）：按住麦克风说话、上滑取消、松开自动发送
   const speech = useSpeech(
     lang,
     (text) => {
@@ -65,7 +65,7 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
     micDownTime.current = Date.now();
     setCancelArmed(false);
     setHolding(true); // 立即显示浮层, 不依赖识别是否成功启动
-    speech.start(); // 尝试启动识别(浏览器可用; Teams 桌面端不支持则松开时提示)
+    speech.start(); // 直接开始收音(浏览器可用; Teams 桌面端不支持则松开时提示)
   };
   const micMove = (e: ReactPointerEvent) => {
     if (!holding) return;
@@ -76,12 +76,29 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
     setHolding(false);
     const elapsed = Date.now() - micDownTime.current;
     if (cancelArmed) speech.cancel();
-    else if (elapsed < 600) {
+    else if (elapsed < 500) {
       speech.cancel(); // 按太短 → 不发送, 提示重试
-      toast(lang === "zh" ? "说话时间太短，请重试" : "Too short, try again");
+      toast(lang === "zh" ? "按住麦克风说话" : "Hold the mic to talk");
     } else speech.finish();
     setCancelArmed(false);
   };
+
+  // 麦克风按钮(直接按住即录音)。Home 与 Chat 共用。
+  const micBtn = speech.supported ? (
+    <button
+      className={`mic ${holding ? "on" : ""}`}
+      onPointerDown={micDown}
+      onPointerMove={micMove}
+      onPointerUp={micUp}
+      onPointerCancel={micUp}
+      onLostPointerCapture={micUp}
+      style={{ touchAction: "none" }}
+      aria-label={lang === "zh" ? "按住说话" : "Hold to talk"}
+      title={lang === "zh" ? "按住说话" : "Hold to talk"}
+    >
+      <MicIcon />
+    </button>
+  ) : null;
 
   return (
     <div className={variant === "home" ? "composer home" : "composer"}>
@@ -96,28 +113,7 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
           </div>
         </div>
       )}
-      {voiceMode ? (
-        <div className="voice-row">
-          <button className="kbd" onClick={() => setVoiceMode(false)} aria-label={lang === "zh" ? "切回键盘" : "Keyboard"}>
-            ⌨
-          </button>
-          <button
-            className={`hold-bar ${holding ? (cancelArmed ? "cancel" : "on") : ""}`}
-            onPointerDown={micDown}
-            onPointerMove={micMove}
-            onPointerUp={micUp}
-            onPointerCancel={micUp}
-            onLostPointerCapture={micUp}
-            style={{ touchAction: "none" }}
-          >
-            {holding
-              ? cancelArmed
-                ? lang === "zh" ? "松开 取消" : "Release to cancel"
-                : lang === "zh" ? "松开 发送" : "Release to send"
-              : lang === "zh" ? "按住 说话" : "Hold to talk"}
-          </button>
-        </div>
-      ) : variant === "home" ? (
+      {variant === "home" ? (
         // Home: Copilot 式大输入框(多行 textarea + 底部操作行)
         <div className="big-box">
           <textarea
@@ -136,11 +132,7 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
           <div className="big-bar">
             <button className="big-plus" aria-label="+">＋</button>
             <div className="big-right">
-              {speech.supported && (
-                <button className="mic" onClick={() => setVoiceMode(true)} aria-label={lang === "zh" ? "语音输入" : "Voice input"} title={lang === "zh" ? "语音输入" : "Voice input"}>
-                  <MicIcon />
-                </button>
-              )}
+              {micBtn}
               {input.trim() && (
                 <button className="send" disabled={streaming} onClick={onSubmit} aria-label={t("send")}>
                   ↑
@@ -160,16 +152,7 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
               if (ev.key === "Enter") onSubmit();
             }}
           />
-          {speech.supported && (
-            <button
-              className="mic"
-              onClick={() => setVoiceMode(true)}
-              aria-label={lang === "zh" ? "语音输入" : "Voice input"}
-              title={lang === "zh" ? "语音输入" : "Voice input"}
-            >
-              <MicIcon />
-            </button>
-          )}
+          {micBtn}
           {input.trim() && (
             <button className="send" disabled={streaming} onClick={onSubmit} aria-label={t("send")}>
               ↑
