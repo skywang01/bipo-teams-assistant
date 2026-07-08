@@ -130,9 +130,11 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
                   🎤
                 </button>
               )}
-              <button className="send" disabled={streaming || !input.trim()} onClick={onSubmit} aria-label={t("send")}>
-                ↑
-              </button>
+              {input.trim() && (
+                <button className="send" disabled={streaming} onClick={onSubmit} aria-label={t("send")}>
+                  ↑
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -157,9 +159,11 @@ export function Composer({ variant = "chat", onSent }: { variant?: "home" | "cha
               🎤
             </button>
           )}
-          <button className="send" disabled={streaming || !input.trim()} onClick={onSubmit} aria-label={t("send")}>
-            ↑
-          </button>
+          {input.trim() && (
+            <button className="send" disabled={streaming} onClick={onSubmit} aria-label={t("send")}>
+              ↑
+            </button>
+          )}
         </div>
       )}
     </div>
