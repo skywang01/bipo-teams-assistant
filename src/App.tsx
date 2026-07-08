@@ -11,7 +11,7 @@ import { ClaimPage } from "./hcm/ClaimPage";
 import { PayrollPage } from "./hcm/PayrollPage";
 
 export function App() {
-  const { activeView, toasts } = useStore();
+  const { activeView, toasts, drawerOpen, closeDrawer } = useStore();
 
   const main =
     activeView === "attendance" ? <AttendancePage /> :
@@ -21,8 +21,9 @@ export function App() {
     <Chat />;
 
   return (
-    <div className="shell">
+    <div className={`shell ${drawerOpen ? "drawer-open" : ""}`}>
       <Sidebar />
+      {drawerOpen && <div className="drawer-backdrop" onClick={closeDrawer} />}
       <main className="content">
         <TopBar />
         <div className="content-body">{main}</div>

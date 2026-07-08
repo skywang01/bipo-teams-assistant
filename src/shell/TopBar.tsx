@@ -5,7 +5,7 @@ import { MODULES } from "../hcm/hcmModules";
 import { t } from "../i18n";
 
 export function TopBar() {
-  const { activeView, lang, seedChat } = useStore();
+  const { activeView, lang, seedChat, toggleDrawer } = useStore();
   const mod = MODULES.find((m) => m.id === activeView);
   const title = mod ? mod.label[lang] : t("appName");
   const [q, setQ] = useState("");
@@ -20,6 +20,7 @@ export function TopBar() {
 
   return (
     <div className="hbar">
+      <button className="hbar-menu" onClick={toggleDrawer} aria-label={lang === "zh" ? "菜单" : "Menu"}>☰</button>
       <div className="hbar-title">{title}</div>
       <div className="hbar-right">
         <input

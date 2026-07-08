@@ -20,6 +20,9 @@ interface Store {
   setActiveView: (v: ViewId) => void;
   collapsed: boolean;
   toggleCollapsed: () => void;
+  drawerOpen: boolean;      // 移动端: 侧栏改抽屉(off-canvas), 此为开合状态
+  toggleDrawer: () => void;
+  closeDrawer: () => void;
   seedText: string | null;
   seedChat: (t: string) => void;
   consumeSeed: () => string | null;
@@ -31,9 +34,10 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>("ee");
   const [lang, setLangState] = useState<Lang>(getLang());
   const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
-  const [activeView, setActiveView] = useState<ViewId>("chat");
-  // 窄屏(手机/Teams 移动端)默认折叠侧栏为图标栏, 避免挤压内容
-  const [collapsed, setCollapsed] = useState(() => typeof window !== "undefined" && window.innerWidth < 700);
+  const [activeView, setActiveViewState] = useState<ViewId>("chat");
+  // 桌面端默认展开侧栏; 移动端侧栏走抽屉(off-canvas), 由 CSS 隐藏, 与 collapsed 无关
+  const [collapsed, setCollapsed] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [seedText, setSeedText] = useState<string | null>(null);
 
   useEffect(() => onLangChange(() => setLangState(getLang())), []);
@@ -47,7 +51,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const switchLang = useCallback(() => setLang(getLang() === "en" ? "zh" : "en"), []);
 
   const toggleCollapsed = useCallback(() => setCollapsed((c) => !c), []);
-  const seedChat = useCallback((t: string) => { setSeedText(t); setActiveView("chat"); }, []);
+  const toggleDrawer = useCallback(() => setDrawerOpen((o) => !o), []);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+  // 导航即关抽屉(移动端点菜单项后自动收起)
+  const setActiveView = useCallback((v: ViewId) => { setActiveViewState(v); setDrawerOpen(false); }, []);
+  const seedChat = useCallback((t: string) => { setSeedText(t); setActiveViewState("chat"); setDrawerOpen(false); }, []);
   const consumeSeed = useCallback(() => {
     let s: string | null = null;
     setSeedText((c) => { s = c; return null; });
@@ -57,6 +65,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const value: Store = {
     role, setRole, lang, switchLang, toasts, toast,
     activeView, setActiveView, collapsed, toggleCollapsed,
+    drawerOpen, toggleDrawer, closeDrawer,
     seedText, seedChat, consumeSeed,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

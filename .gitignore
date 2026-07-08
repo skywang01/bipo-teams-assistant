@@ -11,3 +11,6 @@ tsconfig.tsbuildinfo
 
 # subagent-driven scratch
 .superpowers/
+
+# playwright-mcp scratch
+.playwright-mcp/

@@ -12,7 +12,7 @@ const DICT = {
   roleEE: { en: "Employee", zh: "员工" },
   roleER: { en: "Manager", zh: "管理者" },
   switchRole: { en: "Switch role", zh: "切换角色" },
-  composerPh: { en: "Ask me anything — punch, OT, leave, expense, payslip…", zh: "问我任何事 —— 打卡、OT、休假、报销、工资单…" },
+  composerPh: { en: "Ask me anything…", zh: "问我任何事…" },
   send: { en: "Send", zh: "发送" },
   greetEE: {
     en: "Hi, I'm **BIPO Assistant**. I can clock you in/out, file **OT / leave / expense** requests, or pull your **payslip**. Just ask.",
